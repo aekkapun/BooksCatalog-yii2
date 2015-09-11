@@ -3,17 +3,17 @@
 use yii\db\Schema;
 use yii\db\Migration;
 
-class m150909_171838_create_tables extends Migration
+class m150910_084725_create_tables extends Migration
 {
     public function up()
     {  
         $this->createTable('{{%books}}', [
             'id' => $this->primaryKey(),
             'name' => $this->string()->notNull(),
-            'date_create' => $this->dateTime(),
-            'date_update' => $this->dateTime(),
+            'date_create' => $this->date(),
+            'date_update' => $this->date(),
             'preview' => $this->string(),
-            'date' => $this->dateTime(),
+            'date' => $this->date(),
             'author_id' => $this->integer(),
         ]);        
         $this->createTable('{{%authors}}', [
