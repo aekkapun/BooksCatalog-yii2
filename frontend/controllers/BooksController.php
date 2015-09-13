@@ -33,7 +33,7 @@ class BooksController extends Controller
                 'rules' => [
                     [
                         'allow' => true,
-                        'actions' => ['index', 'view'],
+                        'actions' => ['index'],
                         'roles' => ['?'],
                     ],
                     [
