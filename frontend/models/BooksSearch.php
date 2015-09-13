@@ -80,19 +80,9 @@ class BooksSearch extends Books
         ]);
 
         $query->andFilterWhere(['like', 'name', $this->name])
-            ->andFilterWhere(['>=', 'date', $this->dateFormating($this->firstDate)])
-            ->andFilterWhere(['<=', 'date', $this->dateFormating($this->secondDate)]);
+            ->andFilterWhere(['>=', 'date', self::dateFormating($this->firstDate)])
+            ->andFilterWhere(['<=', 'date', self::dateFormating($this->secondDate)]);
 
         return $dataProvider;
-    }
-
-    /*
-        Возвращает дату в формате Y-m-d
-    */
-    public function dateFormating($date) {
-        if ($date) {
-            $date = str_replace("/", "-", $date);
-            return date('Y-m-d', strtotime($date));
-        }
     }
 }

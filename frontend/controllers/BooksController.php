@@ -8,7 +8,9 @@ use app\models\BooksSearch;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
-use  yii\web\Session;
+use yii\web\Session;
+use yii\web\UploadedFile;
+use yii\filters\AccessControl;
 
 /**
  * BooksController implements the CRUD actions for Books model.
@@ -24,6 +26,24 @@ class BooksController extends Controller
                     'delete' => ['post'],
                 ],
             ],
+
+            'access' => [
+                'class' => AccessControl::className(),
+                'only' => ['index', 'view', 'create', 'update', 'delete'],
+                'rules' => [
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view'],
+                        'roles' => ['?'],
+                    ],
+                    [
+                        'allow' => true,
+                        'actions' => ['index', 'view', 'create', 'update', 'delete'],
+                        'roles' => ['@'],
+                    ],
+                ],
+            ],
+
         ];
     }
 
@@ -67,16 +87,30 @@ class BooksController extends Controller
     public function actionCreate()
     {
         $model = new Books();
-
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
-        } else {
-            return $this->render('create', [
-                'model' => $model,
-            ]);
+        
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $file = UploadedFile::getInstance($model, 'image');
+            $model->image = $file;  
+            
+            // Если изображение выбрано, загрузить его и удалить старое
+            if (!empty($model->image)) {
+                $filename = uniqid();
+                $model->image = $file;
+                $model->preview = $filename.".".$model->image->getExtension();
+                if ($model->save()) {
+                    $file->saveAs( $model->getUplDir() . $filename . "." . $model->image->getExtension() );
+                    return $this->redirect(["index"]);
+                }
+            } else {
+                if ($model->save()) {
+                    return $this->redirect(["index"]);
+                }
+            }
         }
+        return $this->render('create',[
+             'model' => $model,
+           ]);
     }
-
     /**
      * Updates an existing Books model.
      * If update is successful, the browser will be redirected to the 'view' page.
@@ -88,15 +122,35 @@ class BooksController extends Controller
         $model = $this->findModel($id);
         $session = new Session;
         $session->open();
-        // print_r($session['urlParam']);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect("?".$session['urlParam']);
-        } else {
-            return $this->render('update', [
-                'model' => $model,
-            ]);
+        $oldFile = $model->preview;
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $file = UploadedFile::getInstance($model, 'image');
+            $model->image = $file;  
+            
+            // Если изображение выбрано, загрузить его и удалить старое
+            if (!empty($model->image)) {
+                $filename = uniqid();
+                $model->image = $file;
+                $model->preview = $filename.".".$model->image->getExtension();
+                if ($model->save()) {
+                    $file->saveAs( $model->getUplDir() . $filename . "." . $model->image->getExtension() );
+                    if (file_exists($model->getUplDir() . $oldFile)) {
+                        @unlink($model->getUplDir() . $oldFile);  
+                    }
+                    return $this->redirect("?".$session['urlParam']);
+                }
+            } else {
+                if ($model->save()) {
+                    return $this->redirect("?".$session['urlParam']);
+                }
+            }
         }
+
+        return $this->render('update', [
+            'model' => $model,
+        ]);
     }
 
     /**
