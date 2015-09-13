@@ -92,7 +92,7 @@ class BooksController extends Controller
             $file = UploadedFile::getInstance($model, 'image');
             $model->image = $file;  
             
-            // Если изображение выбрано, загрузить его и удалить старое
+            // Если изображение выбрано, загрузить его
             if (!empty($model->image)) {
                 $filename = uniqid();
                 $model->image = $file;

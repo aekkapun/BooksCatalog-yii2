@@ -66,14 +66,14 @@ class Books extends \yii\db\ActiveRecord
     }
      
     /* 
-        Имя автора 
+    * Имя автора 
     */
     public function getAuthorName() {
         return $this->author->firstname." ".$this->author->lastname;
     }
 
     /*
-        Список всех авторов
+    * Список всех авторов
     */
     public static function getAuthorList()
     {
